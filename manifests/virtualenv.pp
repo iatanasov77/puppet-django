@@ -1,5 +1,5 @@
 class vs_django::virtualenv(
-	hostName	= 'django.lh'
+	String $hostName	= 'django.lh'
 ) {
 	case $operatingsystem 
     {
@@ -9,13 +9,14 @@ class vs_django::virtualenv(
         }
         'CentOS':
         {
-//         	$env_path = '/var/www/${hostName}'
-// 			$path_exists = find_file( $env_path )
-// 			
-// 			if ! $path_exists  {
-// 				notify{"Path ${dir_path} exist":}
-// 			}
+        /*
+        	$env_path = '/var/www/${hostName}'
+			$path_exists = find_file( $env_path )
 			
+			if ! $path_exists  {
+				notify{"Path ${dir_path} exist":}
+			}
+		*/
         	# Create project env path
 		    file { "/var/www/${hostName}":
 		        ensure => 'directory',
@@ -24,11 +25,11 @@ class vs_django::virtualenv(
 		        mode   => '0777',
 		    } ->
 		    
-			Exec { "Create virtualenv for project ${hostName}"
+			Exec { "Create virtualenv for project ${hostName}":
 				command	=> "virtualenv --python=/usr/bin/python3 /var/www/${hostName}/venv"
 			} ->
 			
-			Exec { "Install Django for project ${hostName}"
+			Exec { "Install Django for project ${hostName}":
 				command	=> "/var/www/${hostName}/venv/bin/pip3 install Django"
 			}
         }

@@ -1,17 +1,17 @@
 define vs_django::apache_vhost (
     String $hostName,
     String $documentRoot,
-    String $configWsgiDaemon,
-    String $configWsgi,
-    Boolean $withSsl			= false,
+	String $projectPath,
+	String $venvPath,
+    String $user 		= 'apache',
+	String $group		= 'apache',
+	Integer $processes	= 1,
+	Integer $threads	= 2,
+    Boolean $withSsl	= false,
 ) {
-	$customFragment	= "
-		${configWsgiDaemon}
-		${configWsgi}
-	"        		
-    apache::vhost { "${hostName}":
-        port            => '80',
-        serveradmin     => "webmaster@${hostName}",
+	apache::vhost { "${hostName}":
+		port            => '80',
+		serveradmin     => "webmaster@${hostName}",
         docroot         => "${documentRoot}", 
         override        => 'all',
         log_level       => 'debug',
@@ -27,11 +27,23 @@ define vs_django::apache_vhost (
                 'Require'       => 'all granted',
             }
         ],
-        
-        custom_fragment => $customFragment,
-    }
-    
-    if ( $withSsl ) {
+		
+		wsgi_daemon_process         => $hostName,
+		wsgi_daemon_process_options => {
+			python-home	=> $venvPath,
+			python-path	=> $projectPath,
+			user		=> $user,
+			group		=> $group,
+			processes	=> "${processes}",
+			threads		=> "${threads}",
+		},
+		
+		wsgi_process_group          => $hostName,
+		wsgi_script_aliases         => { '/' => "${documentRoot}/wsgi.py" },
+	}
+	
+	if $withSsl {
+	
 		apache::vhost { "${hostName}_ssl":
 			servername 		=> "${hostName}",
 	        serveraliases   => [
@@ -48,7 +60,7 @@ define vs_django::apache_vhost (
 	        override        => 'all',
 	        
 	        aliases         => $aliases,
-	        directories     => $directories + [
+	        directories     => [
 	            {
 	                'path'              => "${documentRoot}",
 	                'allow_override'    => ['All'],
@@ -56,9 +68,11 @@ define vs_django::apache_vhost (
 	            }
 	        ],
 	        
-	        custom_fragment => $configWsgi,
+	        log_level       => 'debug',
 	        
-	        log_level       => $logLevel,
-	    }
+	        wsgi_process_group	=> $hostName,
+			wsgi_script_aliases	=> { '/' => "${documentRoot}/wsgi.py" },
+		}
 	}
+	
 }
