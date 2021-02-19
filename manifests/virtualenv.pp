@@ -3,26 +3,24 @@ define vs_django::virtualenv(
 	Integer $pythonVersion,
 	Array $packages
 ) {
-	/*
-    	$env_path = '/opt/${venv}'
-		$path_exists = find_file( $env_path )
-		
-		if ! $path_exists  {
-			notify{"Path ${dir_path} exist":}
-		}
-	*/
-	
-	file { "/opt/${venv}":
+	file { '/opt/python_virtual_environements':
+        ensure	=> directory,
+        mode    => '0777',
+        owner  	=> 'apache',
+		group  	=> 'root',
+    }
+    
+	$env_path = "/opt/python_virtual_environements/${venv}"
+	file { "${env_path}":
         ensure	=> directory,
         mode    => '0777',
         owner  	=> 'apache',
 		group  	=> 'root',
     } ->
 	Exec { "Create Python virtualenv: ${venv}":
-		command	=> "virtualenv --python=/usr/bin/python${pythonVersion} /opt/${venv}/venv"
-	} ->
-	
+		command	=> "virtualenv --python=/usr/bin/python${pythonVersion} ${env_path}/venv"
+	} ->	
 	Exec { "Install Django for project ${hostName}":
-		command	=> "/opt/${venv}/venv/bin/pip${pythonVersion} install ${join($packages, ' ')}"
+		command	=> "${env_path}/venv/bin/pip${pythonVersion} install ${join($packages, ' ')}"
 	}
 }
