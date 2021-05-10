@@ -9,6 +9,10 @@ define vs_django::apache_vhost (
 	Integer $threads	= 2,
     Boolean $withSsl	= false,
 ) {
+	########################################################################################
+	# See: https://django-project-skeleton.readthedocs.io/en/latest/apache2_vhost.html
+	########################################################################################
+	
 	apache::vhost { "${hostName}":
 		port            => '80',
 		serveradmin     => "webmaster@${hostName}",
@@ -19,12 +23,23 @@ define vs_django::apache_vhost (
         serveraliases   => [
             "www.${hostName}",
         ],
-        
-        directories     => [
+		
+		aliases         => [
             {
+                alias => '/static/',
+                path  => "${projectPath}/static/"
+            }
+        ],
+        directories     => [
+        	{
                 path            => "${documentRoot}",
                 allow_override  => ['All'],
                 'Require'       => 'all granted',
+            },
+            {
+                'path'              => "${projectPath}/static",
+                'allow_override'    => ['All'],
+                'Require'           => 'all granted',
             }
         ],
 		
@@ -75,4 +90,9 @@ define vs_django::apache_vhost (
 		}
 	}
 	
+	/* Create SuperUser for Django Admin Panel
+	Exec { "Create SuperUser for Django in Venv ${name}":
+		command	=> "${venvPath}/bin/python${pythonVersion} ${projectPath}/manage.py createsuperuser"
+	}
+	*/
 }

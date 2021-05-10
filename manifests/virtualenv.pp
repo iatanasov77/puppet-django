@@ -22,5 +22,8 @@ define vs_django::virtualenv(
 	} ->	
 	Exec { "Install Django for project ${hostName}":
 		command	=> "${env_path}/venv/bin/pip${pythonVersion} install ${join($packages, ' ')}"
+	} ->
+	Exec { "Activate Venv for ${venv}":
+		command	=> "${env_path}/venv/bin/activate"
 	}
 }
