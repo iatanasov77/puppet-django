@@ -12,6 +12,8 @@ class vs_django::dependencies
 				'python3',
 				'python3-pip',
 				#'python3-mod_wsgi',
+				'python3-devel',
+				'mysql-devel'
 			]
         	
         	each( $dependencies ) |$dependency| {
