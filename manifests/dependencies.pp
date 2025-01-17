@@ -6,7 +6,7 @@ class vs_django::dependencies
         {
             fail( 'Unsupported Operating System' )
         }
-        'CentOS':
+        'RedHat', 'CentOS', 'OracleLinux', 'Fedora', 'AlmaLinux':
         {
         	$dependencies = [
 				'python3',
